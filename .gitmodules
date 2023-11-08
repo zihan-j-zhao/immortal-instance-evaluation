@@ -1,0 +1,6 @@
+[submodule "cinder"]
+	path = cinder
+	url = git@github.com:facebookincubator/cinder.git
+[submodule "cpython"]
+	path = cpython
+	url = git@github.com:python/cpython.git
