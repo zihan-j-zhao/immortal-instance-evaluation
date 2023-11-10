@@ -156,9 +156,9 @@ def print_stats(pid: int) -> None:
 def export_stats(stats: Stats, path: str) -> None:
     if not os.path.exists(path):
         with open(path, 'w') as f:
-            f.write('timept, category, freeze, utime, stime, cutime, cstime, ' +
-                    'min_flt, maj_flt, cmin_flt, cmaj_flt, vsz, rss, gen0, ' +
-                    'gen1, gen2, perm\n')
+            f.write('timept,category,freeze,utime,stime,cutime,cstime,' +
+                    'min_flt,maj_flt,cmin_flt,cmaj_flt,vsz,rss,gen0,' +
+                    'gen1,gen2,perm\n')
 
     with open(path, 'a') as f:
         f.write(str(stats))
