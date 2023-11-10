@@ -1,0 +1,14 @@
+FROM ghcr.io/facebookincubator/cinder-runtime:cinder-3.10
+
+ENTRYPOINT ["/bin/bash"]
+
+RUN /cinder/bin/pip3 install numpy
+
+RUN mkdir /home/Results
+RUN mkdir /home/Measure
+COPY ../Measure /home/Measure
+
+WORKDIR /home/Measure
+RUN chmod +rx ./run_measure.sh
+
+ENTRYPOINT ["./run_measure.sh"]

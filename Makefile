@@ -1,7 +1,7 @@
 all: imgs/cinder imgs/py310 imgs/py312
 
 imgs/cinder:
-		$(warning Not implemented)
+		docker build -f ./Images/Dockerfile-cinder310 -t cinder/python:3.10 .
 
 imgs/py310:
 		docker build -f ./Images/Dockerfile-py310 -t ubuntu/python:3.10 .
