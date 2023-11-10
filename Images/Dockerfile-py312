@@ -1,11 +1,19 @@
 FROM ubuntu:22.04
 
 RUN apt-get -y update
-RUN apt-get -y install software-properties-common
+RUN apt-get -y install software-properties-common wget
 RUN add-apt-repository ppa:deadsnakes/ppa
-RUN DEBIAN_FRONTEND=noninteractie apt install -y python3.12 python3.12-venv
+RUN DEBIAN_FRONTEND=noninteractie apt install -y python3.12
 
+RUN wget https://bootstrap.pypa.io/get-pip.py
+RUN python3.12 get-pip.py
+RUN python3.12 -m pip install numpy
+
+RUN mkdir /home/Results
 RUN mkdir /home/Measure
 COPY ../Measure /home/Measure
 
-RUN cd /home/Measure && python3.12 -m venv venv
+WORKDIR /home/Measure
+RUN chmod +rx ./run_measure.sh
+
+ENTRYPOINT ["./run_measure.sh"]

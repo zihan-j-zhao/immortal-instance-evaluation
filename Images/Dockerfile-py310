@@ -1,11 +1,19 @@
 FROM ubuntu:22.04
 
 RUN apt-get -y update
-RUN apt-get -y install software-properties-common
+RUN apt-get -y install software-properties-common wget
 RUN add-apt-repository ppa:deadsnakes/ppa
-RUN apt install -y python3.10 python3.10-venv
+RUN apt install -y python3.10
 
+RUN wget https://bootstrap.pypa.io/get-pip.py
+RUN python3.10 get-pip.py
+RUN python3.10 -m pip install numpy
+
+RUN mkdir /home/Results
 RUN mkdir /home/Measure
 COPY ../Measure /home/Measure
 
-RUN cd /home/Measure && python3.10 -m venv venv
+WORKDIR /home/Measure
+RUN chmod +rx ./run_measure.sh
+
+ENTRYPOINT ["./run_measure.sh"]
