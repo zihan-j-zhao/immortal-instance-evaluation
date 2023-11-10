@@ -30,8 +30,10 @@ class Parent:
 
         array = np.random.uniform(low=min, high=max, size=(n,))
 
+        # ========== BEGIN LAMBDA FUNCTION ========== #
         def f(arr):
             return np.sum(arr)
+        # ========== END LAMBDA FUNCTION ========== #
 
         if self._do_freeze:
             gc.freeze()
@@ -40,7 +42,9 @@ class Parent:
 
         if pid:
             os.waitpid(pid, 0)
-            gc.unfreeze()
+
+            if self._do_freeze:
+                gc.unfreeze()
         else:
             res = measure(f, self._output, 'reduction', self._do_freeze)(array)
             print(res)
