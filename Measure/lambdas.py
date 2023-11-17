@@ -41,9 +41,38 @@ def do_linear_regression(event=None):
     return mse, r2
 
 
+def do_image_classification(event=None):
+    import tensorflow as tf
+
+    (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.cifar10.load_data()
+    train_images, test_images = train_images / 255.0, test_images / 255.0
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)),
+        tf.keras.layers.MaxPooling2D((2, 2)),
+        tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+        tf.keras.layers.MaxPooling2D((2, 2)),
+        tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(64, activation='relu'),
+        tf.keras.layers.Dense(10)
+    ])
+
+    model.compile(optimizer='adam',
+                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                  metrics=['accuracy'])
+
+    model.fit(train_images, train_labels, epochs=3,
+              validation_data=(test_images, test_labels))
+
+    test_loss, test_acc = model.evaluate(test_images, test_labels, verbose=2)
+
+    return test_loss, test_acc
+
+
 functions = [
     ('reduction', do_reduction, []),
     ('linear_regression', do_linear_regression, ['pandas', 'sklearn']),
+    ('image_classification', do_image_classification, ['tensorflow'])
 
     # add more experiments down here
 ]

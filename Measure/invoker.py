@@ -22,7 +22,7 @@ class Invoker:
         self._perm_count        = []
 
         # time
-        self._time_ord          = []
+        self._time_ord          = [0]
         self._pkg_load_time     = []
         self._execution_time    = []
 
