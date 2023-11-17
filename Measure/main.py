@@ -1,19 +1,42 @@
 if __name__ == "__main__":
-    import sys
-    from parent import Parent
+    import argparse
+    from lambdas import invoke
 
+    parser = argparse.ArgumentParser(
+        prog="main",
+        description="This program measures process statistics for the given task",
+        epilog="See more in https://github.com/zihan-j-zhao/immortal-instance-evaluation"
+    )
 
-    if len(sys.argv) != 3:
-        print("Usage: python3.x main.py [which_work] [with_freeze]")
-        sys.exit(1)
+    # ========== ADD POSITIONAL ARGS HERE ========== #
+    parser.add_argument(
+        'function',
+        type=str,
+        help='name of the lambda function to invoke'
+    )
+    # ============================================== #
 
-    path = f'/home/Results/{sys.argv[1]}.csv'
-    w_freeze = int(sys.argv[2]) != 0
+    # ========== ADD FLAGS HERE ========== #
+    parser.add_argument(
+        '-f',
+        '--freeze',
+        action='store_true',
+        help='call gc.freeze() before os.fork()'
+    )
+    parser.add_argument(
+        '-c',
+        '--collect',
+        action='store_true',
+        help='call gc.collect() before os.fork()'
+    )
+    # ==================================== #
 
-    p = Parent(output=path, do_freeze=w_freeze)
+    args = parser.parse_args()
 
-    if sys.argv[1] == 'reduction':
-        p.do_reduce(n=100000)
-    else:
-        print("Unknown work")
+    invoke(
+        args.function,
 
+        # optional flags
+        freeze=args.freeze,
+        collect=args.collect,
+    )

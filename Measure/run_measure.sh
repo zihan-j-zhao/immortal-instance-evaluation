@@ -2,8 +2,8 @@
 
 for _ in $(seq $2)
 do
-    $1 ./main.py reduction 0
-    $1 ./main.py reduction 1
+    $1 ./main.py reduction
+    $1 ./main.py reduction -f
 done
 
 
