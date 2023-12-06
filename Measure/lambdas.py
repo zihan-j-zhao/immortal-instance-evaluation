@@ -24,11 +24,11 @@ def do_linear_regression(event=None):
     from sklearn.linear_model import LinearRegression
     from sklearn.metrics import mean_squared_error, r2_score
 
-    path = './Experience-Salary.csv'
+    path = './amz_us_price_prediction_dataset.csv'
     data = pd.read_csv(path)
 
-    X = data['exp(in months)'].values.reshape(-1, 1)
-    y = data['salary(in thousands)'].values
+    X = data['stars'].values.reshape(-1, 1)
+    y = data['price'].values
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
     model = LinearRegression()

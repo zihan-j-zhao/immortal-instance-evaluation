@@ -1,13 +1,10 @@
-FROM ubuntu:22.04
+FROM python:3.12-bullseye
 
-RUN apt-get -y update
-RUN apt-get -y install software-properties-common wget
-RUN add-apt-repository ppa:deadsnakes/ppa
-RUN DEBIAN_FRONTEND=noninteractie apt install -y python3.12
+RUN apt-get update
+RUN apt-get install -y python3-dev gcc 
+RUN apt-get install -y vim
 
-RUN wget https://bootstrap.pypa.io/get-pip.py
-RUN python3.12 get-pip.py
-RUN python3.12 -m pip install numpy
+RUN python3.12 -m pip install numpy scikit-learn pandas
 
 RUN mkdir /home/Results
 RUN mkdir /home/Measure
@@ -16,4 +13,8 @@ COPY ../Measure /home/Measure
 WORKDIR /home/Measure
 RUN chmod +rx ./run_measure.sh
 
-ENTRYPOINT ["./run_measure.sh"]
+RUN python3.12 setup.py bdist_wheel
+RUN python3.12 -m pip install dist/mymodule-0.1-cp312-cp312-linux_aarch64.whl
+
+ENTRYPOINT ["/bin/bash"]
+

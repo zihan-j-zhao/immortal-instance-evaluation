@@ -1,13 +1,13 @@
 class Invoker:
-    def __init__(self, packages, out_dir='../Results/', freeze=False, collect=False):
-        assert type(packages) == list, 'Expect packages to be a list of names (strings)'
-        assert all(isinstance(e, str) for e in packages), 'Expect packages to be a list of names (strings)'
+    def __init__(self, modules, out_dir='../Results/', freeze=False, collect=False):
+        assert type(modules) == list, 'Expect modules to be a list of names (strings)'
+        assert all(isinstance(e, str) for e in modules), 'Expect modules to be a list of names (strings)'
         assert type(freeze) == bool, 'Expect freeze to be a bool'
         assert type(collect) == bool, 'Expect collect to be a bool'
 
-        self._packages          = packages
+        self._modules          = modules
         self._freeze            = freeze
-        self._collect           = collect
+        self._collect           = collect  # unused
         self._out_dir           = out_dir
         self._name              = None
 
@@ -23,25 +23,41 @@ class Invoker:
 
         # time
         self._time_ord          = [0]
-        self._pkg_load_time     = []
+        self._immortal_time     = []
+        self._mod_load_time     = []
         self._execution_time    = []
 
     def run(self, func, event=None):
         self._name = func.__name__[3:]
 
-        import os
         import gc
+        import os
         import time
         import importlib
 
-        for pkg in self._packages:
-            importlib.import_module(pkg)
+        import trackers
 
-        if self._collect:
-            gc.collect()
+
+        trackers.obj_tracker.snapshot() # beginning
+        # =========================
+        gc.callbacks.append(trackers.track_callback)
+
+        for mod in self._modules:
+            importlib.import_module(mod)
+
+        gc.collect() # trigger a full collection of garbage
+
+        t0 = time.time()
+        do_immortalize(gc.get_objects())
+        self._immortal_time.append(time.time() - t0)
+        # =========================
+
+        gc.collect() # move immortal instances to permanent generation
 
         if self._freeze:
             gc.freeze()
+
+        trackers.obj_tracker.snapshot() # after imports and immortalization
 
         pid = os.fork()
 
@@ -49,9 +65,9 @@ class Invoker:
             self.mem_snapshot(desc='child start')
 
             t0 = time.time()
-            for pkg in self._packages:
-                importlib.import_module(pkg)
-            self._pkg_load_time.append(time.time() - t0)
+            for mod in self._modules:
+                importlib.import_module(mod)
+            self._mod_load_time.append(time.time() - t0)
 
             self.mem_snapshot(desc='before lambda')
 
@@ -64,6 +80,10 @@ class Invoker:
             print(res)
         else:
             os.waitpid(pid, 0)
+
+            trackers.gc_tracker.save()
+            trackers.obj_tracker.save()
+
             if self._freeze:
                 gc.unfreeze()
 
@@ -74,7 +94,7 @@ class Invoker:
         self._mem_ord.append(0 if len(self._mem_ord) == 0 else self._mem_ord[-1] + 1)
         self._mem_desc.append(desc)
         self._gen_count.append(gc.get_count())
-        self._perm_count.append(gc.get_freeze_count())
+        self._perm_count.append(0)
 
         with open(f'/proc/{os.getpid()}/stat', 'r') as f:
             stats = f.readline().split(' ')
@@ -93,7 +113,7 @@ class Invoker:
             'ord'       : self._mem_ord,
             'desc'      : self._mem_desc,
             'lambda': [self._name] * n,
-            'packages': [self._packages] * n,
+            'modules': [self._modules] * n,
             'freeze': [self._freeze] * n,
             'collect': [self._collect] * n,
 
@@ -118,10 +138,11 @@ class Invoker:
         time_dict = {
             'ord'               : self._time_ord,
             'lambda'            : [self._name] * n,
-            'packages'          : [self._packages] * n,
+            'modules'           : [self._modules] * n,
             'freeze'            : [self._freeze] * n,
             'collect'           : [self._collect] * n,
-            'pkg_load_time'     : self._pkg_load_time,
+            'immortal_time'     : self._immortal_time,
+            'mod_load_time'     : self._mod_load_time,
             'execution_time'    : self._execution_time,
         }
 
@@ -140,3 +161,19 @@ def write_csv(d, filepath, new_file):
             writer.writeheader()
         for row in zip(*d.values()):
             writer.writerow(dict(zip(d.keys(), row)))
+
+
+def do_immortalize(obj):
+    import sys
+
+    maj = sys.version_info.major
+    min = sys.version_info.minor
+    mic = sys.version_info.micro
+
+    if maj == 3 and min == 12:
+        import immortal
+
+        count, error, stats, status = immortal.immortalize_object(obj, stats=True)
+        print(f"count={count}, error={error}, status={status}")
+        print(f"stats={stats}")
+
