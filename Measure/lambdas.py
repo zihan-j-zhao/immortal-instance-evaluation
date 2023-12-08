@@ -84,6 +84,40 @@ def do_grayscale(event=None):
     return 'done grayscaling 4k image'
 
 
+# Image Processing
+def do_edge_detection(event=None):
+    from PIL import Image
+    import numpy as np
+
+    def sobel_operator(img):
+        sobel_x = np.array([[1, 0, -1],
+                            [2, 0, -2],
+                            [1, 0, -1]])
+        sobel_y = np.array([[1, 2, 1],
+                            [0, 0, 0],
+                            [-1, -2, -1]])
+        pixels = np.arange(img)
+        height, width = pixels.shape
+        edge_img = np.zeros((height, width))
+
+        for i in range(1, height - 1):
+            for j in range(1, width - 1):
+                g_x = np.sum(np.multiply(pixels[i - 1:i + 2, j - 1:j + 2], sobel_x))
+                g_y = np.sum(np.multiply(pixels[i - 1:i + 2, j - 1:j + 2], sobel_y))
+                edge_img[i, j] = np.sqrt(g_x ** 2 + g_y ** 2)
+
+        return edge_img
+
+    original_image = Image.open('./4k_image.jpg')
+    gray_image = original_image.convert("L")
+    edge_pixels = sobel_operator(gray_image)
+    edge_image = Image.fromarray(edge_pixels.astype('uint8'))
+    edge_image = edge_image.convert("L")
+    edge_image.save('4k_edge.jpg')
+
+    return 'done edge 4k image'
+
+
 # Storage
 def do_database_operations(event=None):
     from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table
@@ -112,8 +146,7 @@ def do_database_operations(event=None):
     engine = create_engine('sqlite:///inventory.db')
     Base.metadata.create_all(engine)
 
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    session = sessionmaker(bind=engine)()
 
     for i in range(100):
         new_product = Product(name=f"Product {i}")
@@ -130,8 +163,8 @@ functions = [
     ('linear_regression', do_linear_regression, ['pandas', 'sklearn']),
     # ('image_classification', do_image_classification, ['tensorflow']),
     ('grayscale_4k', do_grayscale, ['PIL', 'numpy']),
+    ('edge_4k', do_edge_detection, ['PIL', 'numpy']),
     ('db_operations', do_database_operations, ['sqlalchemy'])
-
 
     # add more experiments down here
 ]
