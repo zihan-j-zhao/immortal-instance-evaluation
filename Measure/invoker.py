@@ -1,5 +1,6 @@
 class Invoker:
-    def __init__(self, modules, out_dir='../Results/', verbose=False, enable_object_tracker=False):
+    def __init__(self, modules, out_dir='../Results/', verbose=False, 
+                 enable_object_tracker=False):
         assert type(modules) == list, 'Expect modules to be a list of names (strings)'
         assert all(isinstance(e, str) for e in modules), 'Expect modules to be a list of names (strings)'
         assert type(verbose) == bool, 'Expect verbose to be a bool'
@@ -31,11 +32,11 @@ class Invoker:
 
         import gc
         import os
+        import sys
         import time
         import importlib
 
         import trackers
-
 
         if self._ob_tracker_on:
             trackers.obj_tracker.snapshot() # beginning
@@ -47,8 +48,12 @@ class Invoker:
 
         gc.collect() # trigger a full collection of garbage
 
+        maj = sys.version_info.major
+        min = sys.version_info.minor
+
         t0 = time.time()
-        do_immortalize(gc.get_objects(), verbose=self._verbose)
+        if maj == 3 and min == 12:
+            do_immortalize(gc.get_objects(), verbose=self._verbose)
         self._immortal_time.append(time.time() - t0)
         # =========================
 
@@ -76,12 +81,13 @@ class Invoker:
             self.mem_snapshot(desc='after lambda')
             self.persist()
             print(res)
+            sys.exit(0)
         else:
             os.waitpid(pid, 0)
 
             trackers.gc_tracker.save()
-            trackers.obj_tracker.save()
-
+            if self._ob_tracker_on:
+                trackers.obj_tracker.save()
 
     def mem_snapshot(self, desc=None):
         import gc
@@ -156,16 +162,10 @@ def write_csv(d, filepath, new_file):
 
 
 def do_immortalize(obj, verbose=False):
-    import sys
+    import immortal
 
-    maj = sys.version_info.major
-    min = sys.version_info.minor
-
-    if maj == 3 and min == 12:
-        import immortal
-
-        count, error, stats, status = immortal.immortalize_object(obj, stats=verbose)
-        print(f"count={count}, error={error}, status={status}")
-        if verbose:
-            print(f"stats={stats}")
+    count, error, stats, status = immortal.immortalize_object(obj, stats=verbose)
+    print(f"count={count}, error={error}, status={status}")
+    if verbose:
+        print(f"stats={stats}")
 

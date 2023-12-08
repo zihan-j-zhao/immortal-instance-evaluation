@@ -32,6 +32,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    print('----start----')
+
     invoke(
         args.function,
 
@@ -39,3 +41,5 @@ if __name__ == "__main__":
         verbose=args.verbose,
         enable_object_tracker=args.enable_object_tracker,
     )
+
+    print('----end----')

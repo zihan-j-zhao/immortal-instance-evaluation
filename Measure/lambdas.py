@@ -81,6 +81,8 @@ def do_grayscale(event=None):
     grayscale_image = Image.fromarray(grayscale.astype('uint8'))
     grayscale_image.save('4k_grayscale.jpg')
 
+    return 'done grayscaling 4k image'
+
 
 # Storage
 def do_database_operations(event=None):
@@ -113,11 +115,14 @@ def do_database_operations(event=None):
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    new_product = Product(name="New Product")
-    new_supplier = Supplier(name="New Supplier")
-    new_product.suppliers.append(new_supplier)
-    session.add(new_product)
+    for i in range(100):
+        new_product = Product(name=f"Product {i}")
+        new_supplier = Supplier(name=f"Supplier {i}")
+        new_product.suppliers.append(new_supplier)
+        session.add(new_product)
     session.commit()
+
+    return 'done db operations'
 
 
 functions = [

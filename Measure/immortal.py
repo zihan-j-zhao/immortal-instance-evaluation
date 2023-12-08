@@ -12,7 +12,7 @@ stop_types = [int, float, bool, str, bytes, bytearray, types.NoneType,
 
 container_types = [list, tuple, set, frozenset]
 
-def immortalize_object(obj, stats=False) -> int:
+def immortalize_object(obj, stats=False):
     queue    = [obj]  # A queue for iterative immortalization
 
     visited  = set()  # A set of visited objects' ids to avoid infinite loops
