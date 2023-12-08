@@ -62,6 +62,7 @@ class Invoker:
         if self._ob_tracker_on:
             trackers.obj_tracker.snapshot() # after imports and immortalization
 
+        sys.stdout.flush()
         pid = os.fork()
 
         if not pid:
