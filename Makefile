@@ -9,3 +9,4 @@ imgs/py312:
 .PHONY: clean
 clean:
 		rm -rf ./Py310/* ./Py312/*
+		rm -f ./Measure/4k_grayscale.jpg

@@ -2,7 +2,6 @@ from invoker import Invoker
 
 
 def invoke(func_name, **kwargs):
-
     for name, func, packages in functions:
         if name == func_name:
             return Invoker(packages, **kwargs).run(func)
@@ -18,6 +17,7 @@ def do_reduction(event=None):
     return
 
 
+# Machine Learning
 def do_linear_regression(event=None):
     import pandas as pd
     from sklearn.model_selection import train_test_split
@@ -41,6 +41,7 @@ def do_linear_regression(event=None):
     return mse, r2
 
 
+# Machine Learning (tensorflow not supported yet in 3.12)
 def do_image_classification(event=None):
     import tensorflow as tf
 
@@ -69,10 +70,63 @@ def do_image_classification(event=None):
     return test_loss, test_acc
 
 
+# Image Processing
+def do_grayscale():
+    from PIL import Image
+    import numpy as np
+
+    original_image = Image.open('./4k_image.jpg')
+    pixels = np.array(original_image)
+    grayscale = pixels.mean(axis=2)
+    grayscale_image = Image.fromarray(grayscale.astype('uint8'))
+    grayscale_image.save('4k_grayscale.jpg')
+
+
+# Storage
+def do_database_operations():
+    from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy.orm import relationship, sessionmaker
+
+    Base = declarative_base()
+
+    product_supplier_table = Table('product_supplier', Base.metadata,
+        Column('product_id', Integer, ForeignKey('product.id')),
+        Column('supplier_id', Integer, ForeignKey('supplier.id'))
+    )
+
+    class Product(Base):
+        __tablename__ = 'product'
+        id = Column(Integer, primary_key=True)
+        name = Column(String)
+        suppliers = relationship("Supplier", secondary=product_supplier_table, back_populates="products")
+
+    class Supplier(Base):
+        __tablename__ = 'supplier'
+        id = Column(Integer, primary_key=True)
+        name = Column(String)
+        products = relationship("Product", secondary=product_supplier_table, back_populates="suppliers")
+
+    engine = create_engine('sqlite:///inventory.db')
+    Base.metadata.create_all(engine)
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    new_product = Product(name="New Product")
+    new_supplier = Supplier(name="New Supplier")
+    new_product.suppliers.append(new_supplier)
+    session.add(new_product)
+    session.commit()
+
+
 functions = [
     ('reduction', do_reduction, []),
     ('linear_regression', do_linear_regression, ['pandas', 'sklearn']),
-    ('image_classification', do_image_classification, ['tensorflow'])
+    # ('image_classification', do_image_classification, ['tensorflow']),
+    ('grayscale_4k', do_grayscale, ['PIL', 'numpy']),
+    ('db_operations', do_database_operations, ['sqlalchemy'])
+
 
     # add more experiments down here
 ]
