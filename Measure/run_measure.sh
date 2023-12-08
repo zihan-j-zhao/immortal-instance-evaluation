@@ -1,10 +1,8 @@
 #!/bin/bash
 
-for _ in $(seq $2)
+for _ in $(seq $1)
 do
-    $1 ./main.py $3
-    $1 ./main.py $3 -f
-#    $1 ./main.py $3 -c
+    python3 ./main.py $2
 done
 
 

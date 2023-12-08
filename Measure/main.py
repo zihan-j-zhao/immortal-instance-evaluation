@@ -18,16 +18,15 @@ if __name__ == "__main__":
 
     # ========== ADD FLAGS HERE ========== #
     parser.add_argument(
-        '-f',
-        '--freeze',
+        '-v',
+        '--verbose',
         action='store_true',
-        help='call gc.freeze() before os.fork()'
+        help='collect and print more statistics'
     )
     parser.add_argument(
-        '-c',
-        '--collect',
+        '--enable-object-tracker',
         action='store_true',
-        help='call gc.collect() before os.fork()'
+        help='collect info about gc-tracked objects'
     )
     # ==================================== #
 
@@ -37,6 +36,6 @@ if __name__ == "__main__":
         args.function,
 
         # optional flags
-        freeze=args.freeze,
-        collect=args.collect,
+        verbose=args.verbose,
+        enable_object_tracker=args.enable_object_tracker,
     )

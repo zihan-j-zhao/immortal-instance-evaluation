@@ -1,14 +1,13 @@
 class Invoker:
-    def __init__(self, modules, out_dir='../Results/', freeze=False, collect=False):
+    def __init__(self, modules, out_dir='../Results/', verbose=False, enable_object_tracker=False):
         assert type(modules) == list, 'Expect modules to be a list of names (strings)'
         assert all(isinstance(e, str) for e in modules), 'Expect modules to be a list of names (strings)'
-        assert type(freeze) == bool, 'Expect freeze to be a bool'
-        assert type(collect) == bool, 'Expect collect to be a bool'
+        assert type(verbose) == bool, 'Expect verbose to be a bool'
 
-        self._modules          = modules
-        self._freeze            = freeze
-        self._collect           = collect  # unused
+        self._modules           = modules
+        self._verbose           = verbose
         self._out_dir           = out_dir
+        self._ob_tracker_on     = enable_object_tracker
         self._name              = None
 
         # memory
@@ -38,7 +37,8 @@ class Invoker:
         import trackers
 
 
-        trackers.obj_tracker.snapshot() # beginning
+        if self._ob_tracker_on:
+            trackers.obj_tracker.snapshot() # beginning
         # =========================
         gc.callbacks.append(trackers.track_callback)
 
@@ -48,16 +48,14 @@ class Invoker:
         gc.collect() # trigger a full collection of garbage
 
         t0 = time.time()
-        do_immortalize(gc.get_objects())
+        do_immortalize(gc.get_objects(), verbose=self._verbose)
         self._immortal_time.append(time.time() - t0)
         # =========================
 
         gc.collect() # move immortal instances to permanent generation
 
-        if self._freeze:
-            gc.freeze()
-
-        trackers.obj_tracker.snapshot() # after imports and immortalization
+        if self._ob_tracker_on:
+            trackers.obj_tracker.snapshot() # after imports and immortalization
 
         pid = os.fork()
 
@@ -84,8 +82,6 @@ class Invoker:
             trackers.gc_tracker.save()
             trackers.obj_tracker.save()
 
-            if self._freeze:
-                gc.unfreeze()
 
     def mem_snapshot(self, desc=None):
         import gc
@@ -114,8 +110,6 @@ class Invoker:
             'desc'      : self._mem_desc,
             'lambda': [self._name] * n,
             'modules': [self._modules] * n,
-            'freeze': [self._freeze] * n,
-            'collect': [self._collect] * n,
 
             'vsz'       : self._vsz,
             'rss'       : self._rss,
@@ -139,8 +133,6 @@ class Invoker:
             'ord'               : self._time_ord,
             'lambda'            : [self._name] * n,
             'modules'           : [self._modules] * n,
-            'freeze'            : [self._freeze] * n,
-            'collect'           : [self._collect] * n,
             'immortal_time'     : self._immortal_time,
             'mod_load_time'     : self._mod_load_time,
             'execution_time'    : self._execution_time,
@@ -163,17 +155,17 @@ def write_csv(d, filepath, new_file):
             writer.writerow(dict(zip(d.keys(), row)))
 
 
-def do_immortalize(obj):
+def do_immortalize(obj, verbose=False):
     import sys
 
     maj = sys.version_info.major
     min = sys.version_info.minor
-    mic = sys.version_info.micro
 
     if maj == 3 and min == 12:
         import immortal
 
-        count, error, stats, status = immortal.immortalize_object(obj, stats=True)
+        count, error, stats, status = immortal.immortalize_object(obj, stats=verbose)
         print(f"count={count}, error={error}, status={status}")
-        print(f"stats={stats}")
+        if verbose:
+            print(f"stats={stats}")
 

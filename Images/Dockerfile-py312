@@ -5,7 +5,7 @@ RUN apt-get install -y python3-dev gcc
 RUN apt-get install -y vim
 
 RUN python3.12 -m pip install numpy scikit-learn pandas
-RUN python3.10 -m pip install pillow sqlalchemy
+RUN python3.12 -m pip install pillow sqlalchemy
 
 RUN mkdir /home/Results
 RUN mkdir /home/Measure
@@ -17,5 +17,5 @@ RUN chmod +rx ./run_measure.sh
 RUN python3.12 setup.py bdist_wheel
 RUN python3.12 -m pip install dist/mymodule-0.1-cp312-cp312-linux_aarch64.whl
 
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["./run_measure.sh"]
 

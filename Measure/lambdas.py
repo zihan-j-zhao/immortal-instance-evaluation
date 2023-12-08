@@ -71,7 +71,7 @@ def do_image_classification(event=None):
 
 
 # Image Processing
-def do_grayscale():
+def do_grayscale(event=None):
     from PIL import Image
     import numpy as np
 
@@ -83,7 +83,7 @@ def do_grayscale():
 
 
 # Storage
-def do_database_operations():
+def do_database_operations(event=None):
     from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table
     from sqlalchemy.ext.declarative import declarative_base
     from sqlalchemy.orm import relationship, sessionmaker
