@@ -6,6 +6,7 @@ RUN apt-get install -y vim
 
 RUN python3.10 -m pip install numpy scikit-learn pandas
 RUN python3.10 -m pip install pillow sqlalchemy
+RUN python3.10 -m pip install scipy
 
 RUN mkdir /home/Results
 RUN mkdir /home/Measure

@@ -158,13 +158,29 @@ def do_database_operations(event=None):
     return 'done db operations'
 
 
+# Scientific Computing
+def do_linear_solver(event=None):
+    import numpy as np
+    from scipy.linalg import lu_factor, lu_solve
+
+    A = np.array([[3, 2, -1, 5],
+                  [2, -2, 4, 9],
+                  [-1, 0.5, -1, -3],
+                  [1, 8, -6, -2]])
+
+    B = np.array([1, -2, 0, 3])
+    lu, piv = lu_factor(A)
+    return lu_solve((lu, piv), B)
+
+
 functions = [
     ('reduction', do_reduction, []),
     ('linear_regression', do_linear_regression, ['pandas', 'sklearn']),
     # ('image_classification', do_image_classification, ['tensorflow']),
     ('grayscale_4k', do_grayscale, ['PIL', 'numpy']),
     ('edge_4k', do_edge_detection, ['PIL', 'numpy']),
-    ('db_operations', do_database_operations, ['sqlalchemy'])
+    ('db_operations', do_database_operations, ['sqlalchemy']),
+    ('linear_solver', do_linear_solver, ['numpy', 'scipy']),
 
     # add more experiments down here
 ]
