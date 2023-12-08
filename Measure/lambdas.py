@@ -96,7 +96,7 @@ def do_edge_detection(event=None):
         sobel_y = np.array([[1, 2, 1],
                             [0, 0, 0],
                             [-1, -2, -1]])
-        pixels = np.arange(img)
+        pixels = np.array(img)
         height, width = pixels.shape
         edge_img = np.zeros((height, width))
 
